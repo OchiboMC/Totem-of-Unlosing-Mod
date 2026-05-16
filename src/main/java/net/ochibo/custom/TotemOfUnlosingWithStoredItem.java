@@ -1,28 +1,18 @@
 package net.ochibo.custom;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.data.server.loottable.LootTableGenerator;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -30,7 +20,6 @@ import net.ochibo.TotemOfUnlosing;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class TotemOfUnlosingWithStoredItem extends Item {
     public TotemOfUnlosingWithStoredItem(Settings settings) {
@@ -89,7 +78,7 @@ public class TotemOfUnlosingWithStoredItem extends Item {
             for (ZippedItemData data : recoveredList) {
                 if (data.slot() == 0)player.getInventory().setStack(PlayerInventory.OFF_HAND_SLOT, data.toStack());
                 else if (data.slot() == PlayerInventory.OFF_HAND_SLOT)player.getInventory().setStack(0, data.toStack());
-                else if (data.slot() == TotemOfUnlosing.UNKNOWN_SLOT) player.dropItem(data.toStack(),true,true);
+                else if (data.slot() == TotemOfUnlosing.SHOULD_DROP_SLOT) player.dropItem(data.toStack(),true,true);
                 else player.getInventory().setStack(data.slot(), data.toStack());
             }
         }

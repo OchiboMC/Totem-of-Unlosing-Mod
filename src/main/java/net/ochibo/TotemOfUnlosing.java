@@ -14,7 +14,7 @@ public class TotemOfUnlosing implements ModInitializer {
 
     //  Statuses
     public static final byte PROTECTED_BY_TOTEM_OF_UNLOSING = 75;
-    public static final byte UNKNOWN_SLOT = -37;
+    public static final byte SHOULD_DROP_SLOT = -37;
 
 
 	@Override

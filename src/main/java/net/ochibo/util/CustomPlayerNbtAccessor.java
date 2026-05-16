@@ -1,6 +1,8 @@
 package net.ochibo.util;
 
+import net.minecraft.item.ItemStack;
+
 public interface CustomPlayerNbtAccessor {
-    boolean getWasProtectedItem();
-    void setWasProtectedItem(boolean value);
+    ItemStack getUnlosingTotem();
+    void setUnlosingTotem(ItemStack value);
 }
