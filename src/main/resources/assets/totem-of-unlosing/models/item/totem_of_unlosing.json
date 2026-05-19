@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "totem-of-unlosing:item/totem_of_unlosing"
+  }
+}
