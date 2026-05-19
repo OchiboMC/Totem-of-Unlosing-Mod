@@ -9,7 +9,7 @@
 ### English Description
 
 #### Overview
-This data pack adds the **Totem of Unlosing**, a powerful item that preserves your inventory upon death. While it also saves your experience points (XP), be aware that you will lose a larger portion of XP than you would during a normal death.
+This mod adds the **Totem of Unlosing**, a powerful item that preserves your inventory upon death. While it also saves your experience points (XP), be aware that you will lose a larger portion of XP than you would during a normal death.
 
 #### How to Obtain
 * **Ancient Cities:** Can be rarely found in loot chests.
@@ -27,7 +27,7 @@ This data pack adds the **Totem of Unlosing**, a powerful item that preserves yo
 ### 日本語説明
 
 #### 簡単な説明
-死んでしまいますが、アイテムを保持してくれるトーテムを追加するデータパックです。  
+死んでしまいますが、アイテムを保持してくれるトーテムを追加するMODです。  
 経験値も保持してくれますが、普通に死ぬ時よりも多く失ってしまいます。
 
 #### 不失のトーテムの入手方法
