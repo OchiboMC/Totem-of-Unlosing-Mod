@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.ochibo.totem_of_unlosing.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "mixins.totem_of_unlosing.refmap.json",
+  "mixins": [
+    "LivingEntityMixin",
+    "PlayerEntityMixin"
+  ],
+  "client": [
+    "ClientPacketListenerMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
