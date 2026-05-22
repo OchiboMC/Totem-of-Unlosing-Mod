@@ -1,38 +1,29 @@
 package net.ochibo.custom;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.ItemLore;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ochibo.TotemOfUnlosing;
 
 import java.util.List;
 
 public class ModItem {
-    public static final Item TOTEM_OF_UNLOSING = registerItem("totem_of_unlosing", new Item(new Item.Settings().maxCount(1).rarity(Rarity.UNCOMMON)));
-    public static final Item TOTEM_OF_UNLOSING_PROTECTED = registerItem("totem_of_unlosing_protected", new TotemOfUnlosingWithStoredItem(new Item.Settings()
-            .maxCount(1)
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(TotemOfUnlosing.MOD_ID);
+
+    public static final DeferredItem<Item> TOTEM_OF_UNLOSING = ITEMS.register("totem_of_unlosing", 
+        () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
+    public static final DeferredItem<Item> TOTEM_OF_UNLOSING_PROTECTED = ITEMS.register("totem_of_unlosing_protected", 
+        () -> new TotemOfUnlosingWithStoredItem(new Item.Properties()
+            .stacksTo(1)
             .rarity(Rarity.UNCOMMON)
-            .component(ModComponent.STORED_ITEMS,null)
-            .component(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE,true)
-            .component(DataComponentTypes.ITEM_NAME, Text.translatable("item.totem-of-unlosing.totem_of_unlosing"))
-            .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("item.totem-of-unlosing.totem_of_unlosing.protected_desc"))))
+            .component(ModComponent.STORED_ITEMS.get(), new StoredItemsComponent(new byte[0]))
+            .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+            .component(DataComponents.ITEM_NAME, Component.translatable("item.totem_of_unlosing.totem_of_unlosing"))
+            .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.totem_of_unlosing.totem_of_unlosing.protected_desc")), List.of()))
     ));
-
-    private static Item registerItem(String id, Item item) {
-        return Registry.register(Registries.ITEM,RegistryKey.of(Registries.ITEM.getKey(), Identifier.of(TotemOfUnlosing.MOD_ID,id)), item);
-    }
-
-    public static void registerModItem(){
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries ->{
-            entries.add(TOTEM_OF_UNLOSING);
-        });
-    }
 }
