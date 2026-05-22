@@ -1,87 +1,89 @@
 package net.ochibo.custom;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.particle.ItemStackParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.Holder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.ochibo.TotemOfUnlosing;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.List;
 
 public class TotemOfUnlosingWithStoredItem extends Item {
-    public TotemOfUnlosingWithStoredItem(Settings settings) {
-        super(settings);
+    public TotemOfUnlosingWithStoredItem(Properties properties) {
+        super(properties);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         TriConsumer<SoundEvent, Float, Float> play = (ev, volume, pitch) -> {
-            world.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    RegistryEntry.of(ev),
-                    SoundCategory.PLAYERS, volume, pitch);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    ev,
+                    SoundSource.PLAYERS, volume, pitch);
         };
 
-        play.accept(SoundEvents.ENTITY_WARDEN_HEARTBEAT,1f,0.8f);
-        play.accept(SoundEvents.ENTITY_WITHER_BREAK_BLOCK,0.5f,2f);
-        play.accept(SoundEvents.ITEM_OMINOUS_BOTTLE_DISPOSE,1f,0.9f);
-        play.accept(SoundEvents.EVENT_MOB_EFFECT_RAID_OMEN,0.5f,1.3f);
+        play.accept(SoundEvents.WARDEN_HEARTBEAT, 1f, 0.8f);
+        play.accept(SoundEvents.WITHER_BREAK_BLOCK, 0.5f, 2f);
+        play.accept(SoundEvents.OMINOUS_BOTTLE_DISPOSE, 1f, 0.9f);
+        play.accept(SoundEvents.APPLY_EFFECT_RAID_OMEN, 0.5f, 1.3f);
 
         for (int i = 0; i < 20; i++) {
-            Vec3d vec3d = new Vec3d((player.getRandom().nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0);
-            vec3d = vec3d.rotateX(-player.getPitch() * (float) (Math.PI / 180.0));
-            vec3d = vec3d.rotateY(-player.getYaw() * (float) (Math.PI / 180.0));
+            Vec3 vec3 = new Vec3((player.getRandom().nextFloat() - 0.5) * 0.1, level.getRandom().nextDouble() * 0.1 + 0.1, 0.0);
+            vec3 = vec3.xRot(-player.getXRot() * (float) (Math.PI / 180.0));
+            vec3 = vec3.yRot(-player.getYRot() * (float) (Math.PI / 180.0));
             double d = -player.getRandom().nextFloat() * 0.6 - 0.3;
-            Vec3d vec3d2 = new Vec3d((player.getRandom().nextFloat() - 0.5) * 0.3, d, 0.6);
-            vec3d2 = vec3d2.rotateX(-player.getPitch() * (float) (Math.PI / 180.0));
-            vec3d2 = vec3d2.rotateY(-player.getYaw() * (float) (Math.PI / 180.0));
+            Vec3 vec3d2 = new Vec3((player.getRandom().nextFloat() - 0.5) * 0.3, d, 0.6);
+            vec3d2 = vec3d2.xRot(-player.getXRot() * (float) (Math.PI / 180.0));
+            vec3d2 = vec3d2.yRot(-player.getYRot() * (float) (Math.PI / 180.0));
             vec3d2 = vec3d2.add(player.getX(), player.getEyeY(), player.getZ());
-            player.getWorld().addParticle(new ItemStackParticleEffect(ParticleTypes.ITEM, (hand == Hand.MAIN_HAND) ? player.getMainHandStack(): player.getOffHandStack()), vec3d2.x, vec3d2.y, vec3d2.z, vec3d.x, vec3d.y + 0.05, vec3d.z);
+            player.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, (hand == InteractionHand.MAIN_HAND) ? player.getMainHandItem() : player.getOffhandItem()), vec3d2.x, vec3d2.y, vec3d2.z, vec3.x, vec3.y + 0.05, vec3.z);
         }
 
         for (int i = 0; i < 100; i++) {
-            player.getWorld().addParticle(ParticleTypes.REVERSE_PORTAL,player.getX(),player.getY()+1,player.getZ(),player.getRandom().nextDouble() * 3 - 1.5,player.getRandom().nextDouble() * 4 - 2,player.getRandom().nextDouble() * 3 - 1.5);
-            if (i % 2 == 0)player.getWorld().addParticle(ParticleTypes.SOUL,player.getX(),player.getY()+1,player.getZ(),(player.getRandom().nextDouble() * 2 - 1) / 2,(player.getRandom().nextDouble() * 2 - 1) / 2,(player.getRandom().nextDouble() * 2 - 1) / 2);
+            player.level().addParticle(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1, player.getZ(), player.getRandom().nextDouble() * 3 - 1.5, player.getRandom().nextDouble() * 4 - 2, player.getRandom().nextDouble() * 3 - 1.5);
+            if (i % 2 == 0) player.level().addParticle(ParticleTypes.SOUL, player.getX(), player.getY() + 1, player.getZ(), (player.getRandom().nextDouble() * 2 - 1) / 2, (player.getRandom().nextDouble() * 2 - 1) / 2, (player.getRandom().nextDouble() * 2 - 1) / 2);
         }
 
         ItemStack totemStack;
-        if (hand == Hand.MAIN_HAND) {
-            totemStack = player.getMainHandStack().copy();
-            player.getMainHandStack().decrement(1);
+        if (hand == InteractionHand.MAIN_HAND) {
+            totemStack = player.getMainHandItem().copy();
+            player.getMainHandItem().shrink(1);
         } else {
-            totemStack = player.getOffHandStack().copy();
-            player.getOffHandStack().decrement(1);
+            totemStack = player.getOffhandItem().copy();
+            player.getOffhandItem().shrink(1);
         }
 
-        player.getInventory().dropAll();
+        if (!level.isClientSide()) {
+            player.getInventory().dropAll();
 
-        byte[] compressedData = totemStack.get(ModComponent.STORED_ITEMS);
-        if (compressedData != null) {
-            RegistryByteBuf buf = new RegistryByteBuf(
-                    Unpooled.wrappedBuffer(compressedData),
-                    player.getRegistryManager()
-            );
-            List<ZippedItemData> recoveredList = ZippedItemData.decodeList(buf);
+            StoredItemsComponent component = totemStack.get(ModComponent.STORED_ITEMS.get());
+            if (component != null) {
+                byte[] compressedData = component.data;
+                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
+                        Unpooled.wrappedBuffer(compressedData),
+                        player.registryAccess()
+                );
+                List<ZippedItemData> recoveredList = ZippedItemData.decodeList(buf);
+                buf.release();
 
-            for (ZippedItemData data : recoveredList) {
-                if (data.slot() == 0)player.getInventory().setStack(PlayerInventory.OFF_HAND_SLOT, data.toStack());
-                else if (data.slot() == PlayerInventory.OFF_HAND_SLOT)player.getInventory().setStack(0, data.toStack());
-                else if (data.slot() == TotemOfUnlosing.SHOULD_DROP_SLOT) player.dropItem(data.toStack(),true,true);
-                else player.getInventory().setStack(data.slot(), data.toStack());
+                for (ZippedItemData data : recoveredList) {
+                    if (data.slot() == TotemOfUnlosing.SHOULD_DROP_SLOT) player.drop(data.toStack(), true, true);
+                    else player.getInventory().setItem(data.slot(), data.toStack());
+                }
             }
         }
-        return super.use(world, player, hand);
+        return super.use(level, player, hand);
     }
 }

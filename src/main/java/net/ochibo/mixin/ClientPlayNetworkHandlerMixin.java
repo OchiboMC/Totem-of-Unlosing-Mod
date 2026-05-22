@@ -1,69 +1,64 @@
 package net.ochibo.mixin;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.ochibo.TotemOfUnlosing;
 import net.ochibo.custom.ModItem;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 public class ClientPlayNetworkHandlerMixin {
 
-    @Shadow
-    @Final
-    private Random random;
+    @Inject(method = "handleEntityEvent", at = @At("TAIL"))
+    public void onEntityStatus(ClientboundEntityEventPacket packet, CallbackInfo ci) {
+        ClientPacketListener self = (ClientPacketListener) (Object) this;
+        final Minecraft client = Minecraft.getInstance();
+        Entity entity = packet.getEntity(client.level);
 
-    @Inject(method = "onEntityStatus",at=@At("TAIL"))
-    public void onEntityStatus(EntityStatusS2CPacket packet, CallbackInfo ci){
-        ClientPlayNetworkHandler self = (ClientPlayNetworkHandler) (Object) this;
-        final MinecraftClient client = MinecraftClient.getInstance();
-        Entity entity = packet.getEntity(self.getWorld());
-
-        if (entity != null && client.world != null) {
-            switch (packet.getStatus()) {
+        if (entity != null && client.level != null) {
+            switch (packet.getEventId()) {
                 case TotemOfUnlosing.PROTECTED_BY_TOTEM_OF_UNLOSING:
                     for (int i = 0; i < 400; i++) {
-                        client.world.addParticle(ParticleTypes.PORTAL,entity.getX(),entity.getY()+1,entity.getZ(),random.nextDouble() * 3 - 1.5,random.nextDouble() * 4 - 2,random.nextDouble() * 3 - 1.5);
+                        client.level.addParticle(ParticleTypes.PORTAL, entity.getX(), entity.getY() + 1, entity.getZ(),
+                                entity.level().getRandom().nextDouble() * 3 - 1.5,
+                                entity.level().getRandom().nextDouble() * 4 - 2,
+                                entity.level().getRandom().nextDouble() * 3 - 1.5);
                     }
-                    client.world.playSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, entity.getSoundCategory(), 1.0F, 0.72F, false);
-                    client.world.playSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENTITY_WARDEN_SONIC_CHARGE, entity.getSoundCategory(), 1.0F, 0.72F, false);
-                    client.world.playSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.BLOCK_TRIAL_SPAWNER_AMBIENT, entity.getSoundCategory(), 1.0F, 1F, false);
-                    client.world.playSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.BLOCK_TRIAL_SPAWNER_AMBIENT_OMINOUS, entity.getSoundCategory(), 1.0F, 1F, false);
-                    client.world.playSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.EVENT_MOB_EFFECT_BAD_OMEN, entity.getSoundCategory(), 0.9F, 0.6F, false);
+                    client.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT_FREEZE, entity.getSoundSource(), 1.0F, 0.72F, false);
+                    client.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, entity.getSoundSource(), 1.0F, 0.72F, false);
+                    client.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.TRIAL_SPAWNER_AMBIENT, entity.getSoundSource(), 1.0F, 1F, false);
+                    client.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.TRIAL_SPAWNER_AMBIENT_OMINOUS, entity.getSoundSource(), 1.0F, 1F, false);
+                    client.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.APPLY_EFFECT_BAD_OMEN, entity.getSoundSource(), 0.9F, 0.6F, false);
                     if (entity == client.player) {
-                        client.gameRenderer.showFloatingItem(getActiveTotemOfUnlosing(client.player));
+                        client.gameRenderer.displayItemActivation(getActiveTotemOfUnlosing(client.player));
                     }
                     break;
                 default:
-                    entity.handleStatus(packet.getStatus());
+                    // default is handled by original method
             }
         }
     }
 
-
     @Unique
-    private static ItemStack getActiveTotemOfUnlosing(PlayerEntity player) {
-        for (Hand hand : Hand.values()) {
-            ItemStack itemStack = player.getStackInHand(hand);
-            if (itemStack.isOf(ModItem.TOTEM_OF_UNLOSING)) {
+    private static ItemStack getActiveTotemOfUnlosing(Player player) {
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack itemStack = player.getItemInHand(hand);
+            if (itemStack.is(ModItem.TOTEM_OF_UNLOSING.get())) {
                 return itemStack;
             }
         }
 
-        return new ItemStack(ModItem.TOTEM_OF_UNLOSING);
+        return new ItemStack(ModItem.TOTEM_OF_UNLOSING.get());
     }
 }
